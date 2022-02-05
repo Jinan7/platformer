@@ -480,6 +480,7 @@ def jump():
         for X in GLIDEDONX:  # check if bottom coordinate of ball is in a restricted area
             if int(ballx) == X[0][0] and initialBottom <= X[0][1] <= bottom:
                 isJumping = False
+                height = HEIGHT
                 isGliding = True
                 glideType = X[0][2]
                 time = 0  # reset time to 0
