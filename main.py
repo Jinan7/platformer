@@ -124,7 +124,7 @@ def main():
 
     # Game Loop
     while True:
-        pygame.display.set_caption(str(isJumping))
+        pygame.display.set_caption('BOUNCY')
         # event handlers
         for event in pygame.event.get():
 
