@@ -76,6 +76,8 @@ GRAVITY = 1  # acceleration due to gravity
 RIGHT = 'right'
 LEFT = 'left'
 BOTH = 'both'
+HEIGHT = 100
+STOPHEIGHT = 2
 
 # glide constants
 GLIDEAMPLITUDE = CELLX * 2
@@ -103,10 +105,13 @@ def main():
     theta = 0
 
     # Gravity and jump variables
-    global time, landed, isJumping
+    global time, landed, isJumping, height, fallHeight
     isJumping = False
     landed = False
     time = 0
+    height = HEIGHT
+    fallHeight = 0
+
 
     # Start Animation
     getRestricted()
@@ -119,7 +124,7 @@ def main():
 
     # Game Loop
     while True:
-
+        pygame.display.set_caption(str(isJumping))
         # event handlers
         for event in pygame.event.get():
 
@@ -312,6 +317,7 @@ def gravity():
     global landed
     global isJumping
     global glideType, isGliding
+    global fallHeight, height
 
     if not isJumping:
 
@@ -321,6 +327,7 @@ def gravity():
         final = -GRAVITY * (
                 time ** 2)  # ydisplacement equals minus acceleration due to gravity multiplied time squared
         deltaY = final - initial
+        fallHeight += math.fabs(deltaY)
 
         initialBottom = bally + BALLRADIUS
         bally = bally - deltaY
@@ -333,6 +340,13 @@ def gravity():
                 bottom = X[0][
                     1]  # adjust bottom coordinate to surface of restricted zone
                 bally = bottom - BALLRADIUS  # get corresponding center coordinate from adjusted bottom coordinate
+                height = math.sqrt(fallHeight)
+                if height < STOPHEIGHT:
+                    isJumping = False
+                    height = HEIGHT
+                else:
+                    isJumping = True
+                fallHeight = 0
                 break
             else:
                 landed = False
@@ -363,8 +377,9 @@ def move(direction):
             ballx += xVELOCITY
         adjustX(RIGHT)
         if not isJumping and landed:
-            # theta += 0.5 % 360
             theta += ((xVELOCITY / (BALLRADIUS))) % (2 * math.pi)
+        else:
+            theta -= 0.03 % 360
     elif direction == 'left':
         if ballx < STATIC and screenDisplacement != 0:
             screenDisplacement -= xVELOCITY
@@ -372,8 +387,9 @@ def move(direction):
             ballx -= xVELOCITY
         adjustX(LEFT)
         if not isJumping and landed:
-            # theta -= 0.5 % 360
             theta -= ((xVELOCITY / (BALLRADIUS))) % (2 * math.pi)
+        else:
+            theta += 0.03 % 360
 
 
 def adjustX(direction):
@@ -416,10 +432,11 @@ def adjustX(direction):
 
 
 def jump():
-    global time, bally, isJumping, isGliding, glideType
-    initial = -GRAVITY * (time ** 2) + 20 * time
+    global time, bally, isJumping, isGliding, glideType, height, fallHeight
+    initial = -GRAVITY * ((time - math.sqrt(height)) ** 2) + height
     time += FALLSPEED
-    final = -GRAVITY * (time ** 2) + 20 * time
+    final = -GRAVITY * ((time - math.sqrt(height)) ** 2) + height
+   # final = -GRAVITY * (time ** 2) + 20 * time
     deltaY = final - initial
     isAscending = deltaY >= 0
     isDescending = deltaY <= 0
@@ -449,12 +466,17 @@ def jump():
                 break
 
     if isDescending:  # if ball is moving downwards
+        fallHeight += math.fabs(deltaY)
         for X in ALLRESTRICTEDX:
             if int(ballx) == X[0][0] - screenDisplacement and initialBottom <= X[0][1] <= bottom:
+                height = math.sqrt(fallHeight)
+                if height < STOPHEIGHT:
+                    isJumping = False
+                    height = HEIGHT
                 time = 0  # reset time
                 bottom = X[0][1]
                 bally = bottom - BALLRADIUS
-                isJumping = False
+                fallHeight = 0
                 break
         for X in GLIDEDONX:  # check if bottom coordinate of ball is in a restricted area
             if int(ballx) == X[0][0] and initialBottom <= X[0][1] <= bottom:
