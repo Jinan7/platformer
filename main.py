@@ -376,8 +376,8 @@ def move(direction):
             ballx += xVELOCITY
         adjustX(RIGHT)
         if not isJumping and landed:
-            theta += ((xVELOCITY / (BALLRADIUS))) % (2 * math.pi)
-        else:
+            theta += (xVELOCITY / (BALLRADIUS)) % (2 * math.pi)
+        elif height == 100:
             theta -= 0.03 % 360
     elif direction == 'left':
         if ballx < STATIC and screenDisplacement != 0:
@@ -386,8 +386,8 @@ def move(direction):
             ballx -= xVELOCITY
         adjustX(LEFT)
         if not isJumping and landed:
-            theta -= ((xVELOCITY / (BALLRADIUS))) % (2 * math.pi)
-        else:
+            theta -= (xVELOCITY / (BALLRADIUS)) % (2 * math.pi)
+        elif height == 100:
             theta += 0.03 % 360
 
 
